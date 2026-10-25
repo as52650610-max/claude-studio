@@ -242,6 +242,11 @@ back as frames. Decide per shot at G2 and put the riskiest outside shot in the G
 - Use each tool through its own interface: its command line, MCP server, API or window. Nothing is
   wrapped. Ask before starting the user's ComfyUI or Blender and before installing anything (an npm
   package, an add-on, a model). Write each model and its licence in `CREDITS.md`.
+- A generated image is material, not a finished picture. Ask for neutral assets in the film's own
+  style: a character on green, a setting empty, even light, and no words for light, time of day,
+  weather or mood. Light, night, weather and the grade are done in compositing. Never give a model a
+  reference image that looks AI-made: the look carries over and grows with each round. Why:
+  `docs/07-style.md` (生成素材).
 - Check what came back. A Blender script that ran may still have changed nothing: change one light
   first and compare two renders. After `studio frames --key`, read its key and matte lines and open
   `qa/frames_<name>.png` before using the clip.
