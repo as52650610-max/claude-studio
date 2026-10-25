@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<title>Paper cutout</title>
+<script type="module">
+  // 剪紙 · Paper cutout — an 8-second demo on a 120 BPM grid (studio.json "bpm").
+  import { film, vignette } from './engine/studio.js';
+  import { paperCutout } from './shots/paper.js';
+
+  // the table lamp: a little darker at the edges, as a photographed set is
+  film({ shots: [paperCutout], post: ctx => vignette(ctx, { amount: 0.22, inner: 0.45 }) });
+</script>
+</html>

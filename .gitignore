@@ -1,0 +1,22 @@
+# Your films live here. They hold songs, lyrics and renders you may not have the right to publish.
+projects/
+
+# Generated media (examples regenerate their own audio)
+**/out/
+**/audio/*
+!**/audio/README.md
+**/qa/*
+!**/qa/report.md
+**/.segments/
+
+# Secrets
+.env
+.env.*
+
+# Tooling
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.log

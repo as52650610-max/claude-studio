@@ -1,0 +1,34 @@
+name: 來源更正或移除 Credit, correction or removal
+description: 你是被引用的作者、或發現數字和署名有誤 · You are a cited creator, or a number or credit is wrong
+labels: [credit]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        本專案引用了許多創作者的作品與心得（見 docs/18-sources.md）。如果你是作者、希望更正署名或移除引用，我們會優先處理。
+        This project cites many creators (docs/18-sources.md). If you are one of them and want a different credit or a removal, it will be handled first.
+  - type: input
+    id: where
+    attributes:
+      label: 在哪裡 Where
+      placeholder: docs/15-cases.md「……」那一段 · the paragraph about …
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 要做什麼 Request
+      options:
+        - 更正數字或事實 · correct a number or fact
+        - 修改署名或連結 · change the credit or link
+        - 移除引用 · remove the reference
+        - 其他 · other
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: 說明與來源 Details and source
+      description: 正確的內容與可以查證的連結 · The correct information and a link to check it
+    validations:
+      required: true

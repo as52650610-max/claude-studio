@@ -1,0 +1,13 @@
+{
+  "bpm": 120,
+  "key": "D",
+  "mode": "minor",
+  "beatsPerBar": 4,
+  "sections": [
+    { "name": "intro", "bars": 2, "energy": 3 },
+    { "name": "verse", "bars": 2, "energy": 5 },
+    { "name": "pre", "bars": 2, "energy": 6, "build": true, "stop": true },
+    { "name": "chorus", "bars": 4, "energy": 9, "impact": true },
+    { "name": "outro", "bars": 2, "energy": 3 }
+  ]
+}

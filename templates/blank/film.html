@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<title>film</title>
+<script type="module">
+  // A blank film on a 120 BPM grid (studio.json "bpm", "duration"). Add a song later with
+  // "audio" + "studio analyze", and every at.T(bar, beat) below follows the real beats.
+  import { film } from './engine/studio.js';
+  import { hello } from './shots/hello.js';
+
+  film({ shots: [hello] });
+</script>
+</html>

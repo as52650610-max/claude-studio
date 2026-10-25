@@ -1,0 +1,21 @@
+{
+  "name": "mv-studio",
+  "displayName": "Claude Studio",
+  "version": "0.1.0",
+  "description": "Make music videos, lyric videos and animations with Claude: a gated workflow (brief → timing lock → treatment → storyboard → sample → build → review → delivery), beat and lyric timing tools, a deterministic canvas engine, a renderer, sound mixing, QA and an independent jury.",
+  "author": {
+    "name": "claude-studio contributors"
+  },
+  "license": "MIT",
+  "keywords": [
+    "music-video",
+    "lyric-video",
+    "animation",
+    "motion-graphics",
+    "kinetic-typography",
+    "beat-sync",
+    "canvas",
+    "ffmpeg",
+    "cjk"
+  ]
+}

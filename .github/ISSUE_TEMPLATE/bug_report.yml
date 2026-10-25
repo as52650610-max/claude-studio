@@ -1,0 +1,48 @@
+name: 問題回報 Bug report
+description: 指令出錯、結果不對、文件和行為不一致 · A command failed, a result is wrong, or the docs and the tools disagree
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        謝謝回報！請不要貼上沒有授權公開的歌曲、歌詞全文或影片。
+        Thanks! Please don't attach songs, full lyrics or footage you may not share publicly.
+  - type: input
+    id: command
+    attributes:
+      label: 執行的指令 Command
+      placeholder: node tools/studio.mjs analyze projects/my-mv
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: 發生了什麼、你預期什麼 What happened, what you expected
+      description: 有時間點就寫時間點（例：0:42.1 的歌詞早亮 0.3 秒）· Timecodes help (e.g. the lyric at 0:42.1 lights 0.3 s early)
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: 終端機輸出 Output
+      render: text
+  - type: textarea
+    id: doctor
+    attributes:
+      label: doctor 的結果 Output of `node tools/studio.mjs doctor`
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本 Version
+      description: package.json 的版本或 commit · The version in package.json or a commit
+  - type: dropdown
+    id: route
+    attributes:
+      label: 用法 How you use it
+      options:
+        - 外掛（/plugin install）· plugin
+        - 複製整個 repo · clone of the repository
+        - 其他 · other

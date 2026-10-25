@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<title>從一首歌到一支 MV</title>
+<script type="module">
+  // 從一首歌到一支 MV · From a song to a music video. Six chapters, one per step of the workflow
+  // and one per part of the song; the chorus plays the six style cards, one a bar.
+  // Times come from data/songmap.json and data/lyrics.json through song.T, never from seconds.
+  import { film } from './engine/studio.js';
+  import { titlePage } from './shots/end.js';
+  import { listen } from './shots/listen.js';
+  import { looks } from './shots/looks.js';
+  import { lyricChapter, lyricLine } from './shots/lyric.js';
+  import { header, paper } from './shots/page.js';
+  import { timeline } from './shots/timeline.js';
+  import { timeLock } from './shots/timelock.js';
+
+  film({ shots: [paper, titlePage, timeline, listen, timeLock, lyricChapter, looks, lyricLine, header] });
+</script>
+</html>

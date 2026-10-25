@@ -1,0 +1,25 @@
+{
+  "name": "pixel-crt",
+  "title": "像素 CRT · Pixel CRT",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "duration": 8,
+  "fonts": [
+    {
+      "family": "Noto Sans TC",
+      "src": "fonts/NotoSansTC.subset.ttf",
+      "weight": "100 900",
+      "from": "C:/Windows/Fonts/NotoSansTC-VF.ttf"
+    }
+  ],
+  "background": "#000000",
+  "previewScale": 0.5,
+  "posterAt": 7.2,
+  "render": {
+    "codec": "x264",
+    "crf": 16
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "claude-studio",
+  "owner": {
+    "name": "claude-studio contributors"
+  },
+  "description": "Claude Studio: a complete, MIT-licensed workflow for making music videos and animations with Claude Code.",
+  "plugins": [
+    {
+      "name": "mv-studio",
+      "source": "./",
+      "description": "Music videos and animations with Claude: gates, beat and lyric timing, a deterministic render engine, mixing, QA and an independent jury.",
+      "category": "creative",
+      "tags": ["music-video", "lyric-video", "animation", "motion-graphics", "chinese"]
+    }
+  ]
+}

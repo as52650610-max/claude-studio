@@ -1,0 +1,19 @@
+name: 建議 Idea
+description: 新的工具、風格卡、提示範本或流程改進 · A new tool, style card, brief template or workflow improvement
+labels: [idea]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 你在做什麼、卡在哪裡 What you were making and where it got hard
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: 建議的做法 What would help
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 參考 References
+      description: 作品、程式庫（請註明授權）、文章 · Works, repositories (with their licences), articles

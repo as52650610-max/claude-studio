@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<title>ink and paper</title>
+<script type="module">
+  // 水墨紙本 · ink and paper — an 8-second demo on a 120 BPM grid (studio.json "bpm").
+  import { film, grain } from './engine/studio.js';
+  import { inkAndPaper } from './shots/ink.js';
+
+  film({ shots: [inkAndPaper], post: (ctx, s) => grain(ctx, s.frame, { amount: 0.025 }) });
+</script>
+</html>

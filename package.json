@@ -1,0 +1,29 @@
+{
+  "name": "claude-studio",
+  "version": "0.1.0",
+  "description": "Make music videos and animations with Claude Opus 5.5: beat and lyric timing, a deterministic render engine, QA and an independent jury.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "studio": "tools/studio.mjs"
+  },
+  "scripts": {
+    "studio": "node tools/studio.mjs",
+    "doctor": "node tools/studio.mjs doctor",
+    "test": "node tests/run.mjs"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "music-video",
+    "lyric-video",
+    "animation",
+    "motion-graphics",
+    "canvas",
+    "ffmpeg"
+  ]
+}

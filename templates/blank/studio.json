@@ -1,0 +1,16 @@
+{
+  "name": "my-film",
+  "title": "",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "bpm": 120,
+  "beatsPerBar": 4,
+  "duration": 8,
+  "fonts": [{ "family": "Noto Sans TC", "src": "fonts/NotoSansTC.subset.ttf", "weight": "100 900" }],
+  "lyricFont": "Noto Sans TC",
+  "background": "#101014",
+  "previewScale": 0.5,
+  "mix": { "target": -14, "ceiling": -1.5 },
+  "render": { "codec": "x264", "crf": 16 }
+}

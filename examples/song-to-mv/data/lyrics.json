@@ -1,0 +1,362 @@
+{
+  "version": 1,
+  "source": "claude-studio 原創歌詞（MIT）。每個字的時間是人聲分軌量到的起音（studio analyze --stems）；弱於 0.2 的起音不算一個音。",
+  "lines": [
+    {
+      "i": 0,
+      "start": 4.751,
+      "end": 8.004,
+      "text": "數清每一拍　對準心跳",
+      "translation": "Count every beat, lock onto the pulse",
+      "section": "intro1",
+      "keyword": false,
+      "chars": [
+        {
+          "c": "數",
+          "start": 4.751,
+          "end": 4.998,
+          "est": false
+        },
+        {
+          "c": "清",
+          "start": 4.998,
+          "end": 5.251,
+          "est": false
+        },
+        {
+          "c": "每",
+          "start": 5.251,
+          "end": 5.75,
+          "est": false
+        },
+        {
+          "c": "一",
+          "start": 5.75,
+          "end": 6.005,
+          "est": false
+        },
+        {
+          "c": "拍",
+          "start": 6.005,
+          "end": 6.75,
+          "est": false
+        },
+        {
+          "c": "　",
+          "start": 6.75,
+          "end": 6.75,
+          "est": false
+        },
+        {
+          "c": "對",
+          "start": 6.75,
+          "end": 7.002,
+          "est": false
+        },
+        {
+          "c": "準",
+          "start": 7.002,
+          "end": 7.249,
+          "est": false
+        },
+        {
+          "c": "心",
+          "start": 7.249,
+          "end": 7.504,
+          "est": false
+        },
+        {
+          "c": "跳",
+          "start": 7.504,
+          "end": 8.004,
+          "est": false
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "start": 8.502,
+      "end": 12.499,
+      "text": "每個字　都落在音符上",
+      "translation": "Every word lands on a note",
+      "section": "intro1",
+      "keyword": false,
+      "chars": [
+        {
+          "c": "每",
+          "start": 8.502,
+          "end": 8.749,
+          "est": false
+        },
+        {
+          "c": "個",
+          "start": 8.749,
+          "end": 9.002,
+          "est": false
+        },
+        {
+          "c": "字",
+          "start": 9.002,
+          "end": 9.501,
+          "est": false
+        },
+        {
+          "c": "　",
+          "start": 9.501,
+          "end": 9.501,
+          "est": false
+        },
+        {
+          "c": "都",
+          "start": 9.501,
+          "end": 9.747,
+          "est": false
+        },
+        {
+          "c": "落",
+          "start": 9.747,
+          "end": 10.001,
+          "est": false
+        },
+        {
+          "c": "在",
+          "start": 10.001,
+          "end": 10.499,
+          "est": false
+        },
+        {
+          "c": "音",
+          "start": 10.499,
+          "end": 11.5,
+          "est": false
+        },
+        {
+          "c": "符",
+          "start": 11.5,
+          "end": 11.999,
+          "est": false
+        },
+        {
+          "c": "上",
+          "start": 11.999,
+          "end": 12.499,
+          "est": false
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "start": 16.746,
+      "end": 20.0,
+      "text": "同樣一首歌　六種模樣",
+      "translation": "One song, six different looks",
+      "section": "chorus1",
+      "keyword": false,
+      "chars": [
+        {
+          "c": "同",
+          "start": 16.746,
+          "end": 17.002,
+          "est": false
+        },
+        {
+          "c": "樣",
+          "start": 17.002,
+          "end": 17.247,
+          "est": false
+        },
+        {
+          "c": "一",
+          "start": 17.247,
+          "end": 17.746,
+          "est": false
+        },
+        {
+          "c": "首",
+          "start": 17.746,
+          "end": 18.001,
+          "est": false
+        },
+        {
+          "c": "歌",
+          "start": 18.001,
+          "end": 18.752,
+          "est": false
+        },
+        {
+          "c": "　",
+          "start": 18.752,
+          "end": 18.752,
+          "est": false
+        },
+        {
+          "c": "六",
+          "start": 18.752,
+          "end": 18.998,
+          "est": false
+        },
+        {
+          "c": "種",
+          "start": 18.998,
+          "end": 19.252,
+          "est": false
+        },
+        {
+          "c": "模",
+          "start": 19.252,
+          "end": 19.5,
+          "est": false
+        },
+        {
+          "c": "樣",
+          "start": 19.5,
+          "end": 20.0,
+          "est": false
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "start": 20.75,
+      "end": 24.003,
+      "text": "每一格畫面　都是時間",
+      "translation": "Every frame is made of time",
+      "section": "chorus1",
+      "keyword": false,
+      "chars": [
+        {
+          "c": "每",
+          "start": 20.75,
+          "end": 21.005,
+          "est": false
+        },
+        {
+          "c": "一",
+          "start": 21.005,
+          "end": 21.25,
+          "est": false
+        },
+        {
+          "c": "格",
+          "start": 21.25,
+          "end": 21.75,
+          "est": false
+        },
+        {
+          "c": "畫",
+          "start": 21.75,
+          "end": 22.003,
+          "est": false
+        },
+        {
+          "c": "面",
+          "start": 22.003,
+          "end": 22.748,
+          "est": false
+        },
+        {
+          "c": "　",
+          "start": 22.748,
+          "end": 22.748,
+          "est": false
+        },
+        {
+          "c": "都",
+          "start": 22.748,
+          "end": 23.002,
+          "est": false
+        },
+        {
+          "c": "是",
+          "start": 23.002,
+          "end": 23.248,
+          "est": false
+        },
+        {
+          "c": "時",
+          "start": 23.248,
+          "end": 23.503,
+          "est": false
+        },
+        {
+          "c": "間",
+          "start": 23.503,
+          "end": 24.003,
+          "est": false
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "start": 24.501,
+      "end": 28.496,
+      "text": "聽得見的　全都看得見",
+      "translation": "All you can hear, you can see",
+      "section": "chorus1",
+      "keyword": false,
+      "chars": [
+        {
+          "c": "聽",
+          "start": 24.501,
+          "end": 24.746,
+          "est": false
+        },
+        {
+          "c": "得",
+          "start": 24.746,
+          "end": 25.0,
+          "est": false
+        },
+        {
+          "c": "見",
+          "start": 25.0,
+          "end": 25.501,
+          "est": false
+        },
+        {
+          "c": "的",
+          "start": 25.501,
+          "end": 25.752,
+          "est": false
+        },
+        {
+          "c": "　",
+          "start": 25.752,
+          "end": 25.752,
+          "est": false
+        },
+        {
+          "c": "全",
+          "start": 25.752,
+          "end": 26.001,
+          "est": false
+        },
+        {
+          "c": "都",
+          "start": 26.001,
+          "end": 26.497,
+          "est": false
+        },
+        {
+          "c": "看",
+          "start": 26.497,
+          "end": 27.498,
+          "est": false
+        },
+        {
+          "c": "得",
+          "start": 27.498,
+          "end": 27.996,
+          "est": false
+        },
+        {
+          "c": "見",
+          "start": 27.996,
+          "end": 28.496,
+          "est": false
+        }
+      ]
+    }
+  ],
+  "publishable": true
+}

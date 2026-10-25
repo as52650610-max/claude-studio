@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<title>hello, beat</title>
+<script type="module">
+  // hello, beat: one dot, one song. The beats, the stop and the impact come from
+  // data/songmap.json (studio analyze); the parts are bars of music.json (song.T).
+  import { film, grain } from './engine/studio.js';
+  import { chorus, dot, ending, hud } from './shots/beat.js';
+
+  film({
+    shots: [dot, chorus, ending, hud],
+    post: (ctx, s) => grain(ctx, s.frame, { amount: 0.035 }),
+  });
+</script>
+</html>

@@ -1,0 +1,42 @@
+{
+  "name": "song-to-mv",
+  "title": "從一首歌到一支 MV",
+  "artist": "claude-studio",
+  "credits": "music, lyrics and pictures: claude-studio (MIT) · Noto Sans TC, Noto Serif TC (SIL OFL 1.1)",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "audio": "audio/song.wav",
+  "songmap": "data/songmap.json",
+  "lyrics": "data/lyrics.json",
+  "cues": "data/cues.json",
+  "offset": 0,
+  "lyricOffset": 0,
+  "fonts": [
+    {
+      "family": "Noto Sans TC",
+      "src": "fonts/NotoSansTC.subset.ttf",
+      "weight": "100 900",
+      "from": "C:/Windows/Fonts/NotoSansTC-VF.ttf"
+    },
+    {
+      "family": "Noto Serif TC",
+      "src": "fonts/NotoSerifTC.subset.ttf",
+      "weight": "200 900",
+      "from": "C:/Windows/Fonts/NotoSerifTC-VF.ttf"
+    }
+  ],
+  "lyricFont": "Noto Sans TC",
+  "background": "#F4F1EA",
+  "previewScale": 0.5,
+  "mix": {
+    "target": -14,
+    "ceiling": -1.5,
+    "music": 0
+  },
+  "render": {
+    "codec": "x264",
+    "crf": 16
+  },
+  "posterAt": 31.9
+}

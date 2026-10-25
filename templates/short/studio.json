@@ -1,0 +1,23 @@
+{
+  "name": "my-short",
+  "title": "歌名",
+  "artist": "演出者",
+  "hook": "副歌第一句就要抓住人",
+  "width": 1080,
+  "height": 1920,
+  "fps": 30,
+  "audio": "audio/song.wav",
+  "songmap": "data/songmap.json",
+  "lyrics": "data/lyrics.json",
+  "cues": "data/cues.json",
+  "offset": 0,
+  "lyricOffset": 0,
+  "duration": 30,
+  "fonts": [{ "family": "Noto Sans TC", "src": "fonts/NotoSansTC.subset.ttf", "weight": "100 900" }],
+  "lyricFont": "Noto Sans TC",
+  "lyricSize": 128,
+  "background": "#0b0b0f",
+  "previewScale": 0.4,
+  "mix": { "target": -14, "ceiling": -1.5, "music": 0, "fadeIn": 0, "fadeOut": 0.8 },
+  "render": { "codec": "x264", "crf": 17 }
+}

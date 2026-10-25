@@ -1,0 +1,22 @@
+{
+  "name": "my-mv",
+  "title": "歌名",
+  "artist": "演出者",
+  "credits": "music · lyrics · made with claude-studio",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "audio": "audio/song.wav",
+  "songmap": "data/songmap.json",
+  "lyrics": "data/lyrics.json",
+  "cues": "data/cues.json",
+  "offset": 0,
+  "lyricOffset": 0,
+  "fonts": [{ "family": "Noto Sans TC", "src": "fonts/NotoSansTC.subset.ttf", "weight": "100 900" }],
+  "lyricFont": "Noto Sans TC",
+  "lyricSize": 84,
+  "background": "#0d0d10",
+  "previewScale": 0.5,
+  "mix": { "target": -14, "ceiling": -1.5, "music": 0 },
+  "render": { "codec": "x264", "crf": 16 }
+}

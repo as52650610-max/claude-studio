@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<title>film</title>
+<script type="module">
+  // A vertical short (9:16) cut from a song.
+  //
+  // The excerpt: to start the short at song time 62.5 s and run 30 s, set in studio.json
+  //   "offset": -62.5, "duration": 30
+  // Beats, sections and lyrics follow the offset; "studio mix" cuts the song the same way
+  // (with "mix": { "fadeOut": 0.8 } so the ending does not chop).
+  //
+  // Phone apps cover the edges: keep text inside the safe box (see ?safe=1 in the preview).
+  import { film, grain } from './engine/studio.js';
+  import { bands } from './shots/bands.js';
+  import { hook } from './shots/hook.js';
+  import { bigLyrics } from './shots/lyrics.js';
+  import { safeGuides } from './shots/style.js';
+
+  film({
+    shots: [bands, hook, bigLyrics],
+    post(ctx, s) {
+      grain(ctx, s.frame, { amount: 0.04 });
+      safeGuides(ctx, s);
+    },
+  });
+</script>
+</html>

@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lyric tapper</title>
+<!--
+  claude-studio lyric tapper. MIT License. One file, no network, no dependencies.
+
+  Time lyric lines by ear: hold Space while a line is sung (press = start, release = end).
+  Open this file in Chrome/Edge and load a song and the lyrics, or run
+    node tools/studio.mjs tap <project>
+  which serves it with the project's song, lyrics and songmap already loaded.
+  Export LRC, then: node tools/studio.mjs lyrics import <project> tapped.lrc
+-->
+<style>
+:root{color-scheme:dark;--bg:#0e0e11;--panel:#16161b;--panel2:#1c1c22;--line:#2a2a31;--ink:#ebe8e1;--dim:#8d8b93;--faint:#55545c;--accent:#ffb347;--cursor:#6aa8ff;--bad:#ff7a7a;--ok:#7bd88f}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,"Segoe UI","Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif}
+body{display:grid;grid-template-rows:auto auto auto 1fr auto;height:100vh;overflow:hidden}
+header{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+header h1{font-size:15px;margin:0 10px 0 0;font-weight:650;letter-spacing:.02em}
+header h1 small{color:var(--dim);font-weight:400;margin-left:6px}
+.btn{background:var(--panel2);color:var(--ink);border:1px solid #393942;border-radius:7px;padding:5px 11px;font:inherit;cursor:pointer;white-space:nowrap}
+.btn:hover{background:#25252c}
+.btn:focus-visible,.row:focus-visible{outline:2px solid var(--cursor);outline-offset:1px}
+.btn.primary{background:#3a2d14;border-color:#a8782a;color:#ffd99a}
+.btn.on{background:#1f2c40;border-color:#4d7fc4;color:#cfe2ff}
+.btn[disabled]{opacity:.45;cursor:default}
+.file{position:relative;overflow:hidden}
+.file input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.sep{width:1px;height:22px;background:var(--line);margin:0 4px}
+.grow{flex:1}
+.chip{font:12px ui-monospace,Consolas,monospace;color:var(--dim);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:4px 8px}
+#wave{padding:10px 14px 4px;background:var(--bg)}
+#zoom{display:block;width:100%;height:150px;border-radius:8px;background:#121216;cursor:crosshair}
+#over{display:block;width:100%;height:34px;margin-top:6px;border-radius:6px;background:#121216;cursor:pointer}
+#now{display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:end;padding:8px 18px 12px;border-bottom:1px solid var(--line)}
+#now .lab{grid-column:1/-1;font-size:12px;color:var(--dim)}
+#nowText{font-size:clamp(22px,3.4vw,40px);font-weight:700;color:var(--cursor);min-height:1.3em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#nowText.holding{color:var(--accent)}
+#nextText{grid-column:1/-1;color:var(--faint);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.4em}
+#hold{font:600 13px ui-monospace,Consolas,monospace;color:var(--accent);opacity:0;transition:opacity .1s}
+#hold.on{opacity:1}
+main{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,32%);min-height:0}
+#list{overflow:auto;padding:6px 0 20px}
+.row{display:grid;grid-template-columns:44px 92px 92px minmax(0,1fr);gap:8px;padding:5px 14px;border-left:3px solid transparent;cursor:pointer;align-items:baseline}
+.row:hover{background:#15151a}
+.row .n{color:var(--faint);font:12px ui-monospace,Consolas,monospace;text-align:right}
+.row .t{font:13px ui-monospace,Consolas,monospace;color:var(--dim)}
+.row .t.unset{color:var(--faint)}
+.row .x{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .x i{color:var(--dim);font-style:normal;margin-left:10px;font-size:12px}
+.row.cur{border-left-color:var(--cursor);background:#141b26}
+.row.live .x{color:var(--accent)}
+.row.warn .t.s{color:var(--bad)}
+aside{border-left:1px solid var(--line);display:grid;grid-template-rows:auto 1fr auto auto;min-height:0;background:#111115}
+aside h2{font-size:12px;font-weight:600;color:var(--dim);margin:10px 12px 6px;text-transform:uppercase;letter-spacing:.06em}
+textarea{width:calc(100% - 24px);margin:0 12px;resize:none;background:#0b0b0e;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:14px/1.6 inherit;min-height:0}
+aside .acts{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px}
+#notes{margin:0 12px 12px;font-size:12px;color:var(--dim);white-space:pre-wrap}
+footer{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center;padding:7px 14px;background:var(--panel);border-top:1px solid var(--line);font-size:12px;color:var(--dim)}
+footer kbd{font:11px ui-monospace,Consolas,monospace;background:#24242b;border:1px solid #3a3a43;border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--ink)}
+#time{font:13px ui-monospace,Consolas,monospace;color:var(--ink)}
+.modal{position:fixed;inset:0;background:#000a;display:none;place-items:center;z-index:5}
+.modal.on{display:grid}
+.card{background:var(--panel);border:1px solid #3a3a43;border-radius:12px;padding:18px 20px;width:min(520px,calc(100vw - 32px));line-height:1.6}
+.card h3{margin:0 0 8px;font-size:16px}
+.card p{margin:6px 0;color:#cfccc5}
+.dots{display:flex;gap:6px;margin:12px 0}
+.dots span{width:14px;height:14px;border-radius:50%;background:#2a2a31}
+.dots span.beep{background:var(--accent)}
+.dots span.got{background:var(--ok)}
+#toast{position:fixed;right:16px;bottom:48px;background:#1d2a1d;border:1px solid #3d6b3d;color:#d6f0d6;padding:7px 12px;border-radius:8px;font-size:13px;opacity:0;transition:opacity .25s;pointer-events:none;max-width:60vw}
+#drop{position:fixed;inset:0;border:3px dashed var(--accent);display:none;place-items:center;font-size:20px;background:#0008;z-index:4}
+#drop.on{display:grid}
+@media (max-width:800px){main{grid-template-columns:1fr}aside{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>歌詞拍點器<small>Lyric tapper</small></h1>
+  <label class="btn file" title="WAV, MP3, FLAC, M4A …">♪ 載入歌曲 Song<input id="audioFile" type="file" accept="audio/*,.wav,.mp3,.flac,.m4a,.ogg"></label>
+  <label class="btn file" title=".txt (one line per lyric line), .lrc, .srt or claude-studio lyrics.json">≡ 載入歌詞 Lyrics<input id="lyricsFile" type="file" accept=".txt,.lrc,.srt,.vtt,.json,text/plain"></label>
+  <label class="btn file" title="data/songmap.json from studio analyze: draws beats and sections">▦ 節拍圖 Songmap<input id="songmapFile" type="file" accept=".json"></label>
+  <span class="sep"></span>
+  <button class="btn" id="playBtn" title="Play / pause (P)">▶ 播放</button>
+  <button class="btn" data-rate="1" title="1">1×</button>
+  <button class="btn" data-rate="0.75" title="2">0.75×</button>
+  <button class="btn" data-rate="0.5" title="3">0.5×</button>
+  <button class="btn" id="calBtn" title="Measure how late your taps arrive (headphones included)">⏱ 校準 Calibrate</button>
+  <span class="grow"></span>
+  <span class="chip" id="compChip">補償 0 ms</span>
+  <button class="btn" id="restoreBtn" style="display:none">↺ 恢復上次 Restore</button>
+  <button class="btn" id="copyBtn">複製 LRC</button>
+  <button class="btn primary" id="saveBtn">⬇ 下載 LRC</button>
+</header>
+
+<section id="wave">
+  <canvas id="zoom" aria-label="waveform around the playhead"></canvas>
+  <canvas id="over" aria-label="the whole song"></canvas>
+</section>
+
+<section id="now">
+  <div class="lab" id="nowLab">下一句要拍 · next line to tap</div>
+  <div id="nowText">載入歌曲與歌詞開始 · load a song and lyrics to start</div>
+  <div id="hold">● 按住中 HOLD</div>
+  <div id="nextText"></div>
+</section>
+
+<main>
+  <div id="list" role="listbox" aria-label="lyric lines"></div>
+  <aside>
+    <h2>歌詞文字 · text (一行一句 one line per line)</h2>
+    <textarea id="text" spellcheck="false" placeholder="貼上歌詞，一行一句。空行、[副歌] 之類的段落標題和 # 開頭的行會被略過。&#10;Paste the lyrics, one line per sung line. Blank lines, [Chorus] headers and # lines are skipped.&#10;翻譯可以寫在同一行的 | 後面 · a translation can follow a | on the same line."></textarea>
+    <div class="acts">
+      <button class="btn" id="applyBtn" title="Use this text for the lines (times are kept line by line)">套用文字 Apply</button>
+      <button class="btn" id="clearBtn" title="Clear every time (undo with Z)">清除時間 Clear times</button>
+    </div>
+    <div id="notes"></div>
+  </aside>
+</main>
+
+<footer>
+  <span id="time">0:00.000 / 0:00.000</span>
+  <span><kbd>Space</kbd> 按住＝唱這句（按下起、放開止）· hold while the line is sung</span>
+  <span><kbd>P</kbd> 播放 play</span>
+  <span><kbd>←</kbd><kbd>→</kbd> ±2 s</span>
+  <span><kbd>↑</kbd><kbd>↓</kbd> 選句 line</span>
+  <span><kbd>,</kbd><kbd>.</kbd> 起點 start ±10 ms · <kbd>&lt;</kbd><kbd>&gt;</kbd> 終點 end</span>
+  <span><kbd>R</kbd> 重聽這句 replay</span>
+  <span><kbd>Del</kbd> 清除 clear</span>
+  <span><kbd>Z</kbd> 復原 undo</span>
+  <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 速度 speed</span>
+</footer>
+
+<div class="modal" id="calModal" role="dialog" aria-modal="true" aria-labelledby="calTitle">
+  <div class="card">
+    <h3 id="calTitle">校準 · Calibrate</h3>
+    <p>戴上等一下要用的耳機（藍牙耳機常慢 150–250 ms），按「開始」後跟著嗶聲按 <b>空白鍵</b>，一共 16 聲。</p>
+    <p style="color:var(--dim)">Use the headphones you will tap with (Bluetooth adds 150–250 ms). Press Start, then tap <b>Space</b> on each of the 16 beeps.</p>
+    <div class="dots" id="calDots"></div>
+    <p id="calMsg" style="min-height:1.6em"></p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" id="calCancel">關閉 Close</button>
+      <button class="btn" id="calReset">歸零 Zero</button>
+      <button class="btn primary" id="calStart">開始 Start</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+<div id="drop">放開以載入 · drop a song or a lyrics file</div>
+
+<script>
+'use strict';
+// ─── State ──────────────────────────────────────────────────────────────────────────────────
+// Times are song times in seconds (the same as data/lyrics.json): 0 = the start of the audio file.
+const S = {
+  lines: [],          // { text, translation, start, end } — start/end null until tapped
+  cursor: 0,          // the line the next Space press marks
+  comp: 0,            // seconds added to every tap (negative: taps arrive late)
+  rate: 1,
+  audioName: '',
+  songmap: null,
+  undo: [],
+};
+let ac = null, buffer = null, peaks = null, src = null;
+let playing = false, startedAt = 0, startOffset = 0, pausedAt = 0;
+let holding = null;   // { line, downAt (perf ms), start }
+let tableDirty = true;
+const $ = id => document.getElementById(id);
+const fmt = t => {
+  if (t == null || !isFinite(t)) return '—';
+  const s = Math.max(0, t), m = Math.floor(s / 60);
+  return `${m}:${(s - m * 60).toFixed(3).padStart(6, '0')}`;
+};
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const duration = () => (buffer ? buffer.duration : 0);
+function toast(msg, ms = 1800) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.style.opacity = 1;
+  clearTimeout(toast.h);
+  toast.h = setTimeout(() => (el.style.opacity = 0), ms);
+}
+
+// ─── Audio clock ────────────────────────────────────────────────────────────────────────────
+// What matters is what the listener hears: getOutputTimestamp maps a performance.now() time to
+// the context time being played at the speaker, so output latency is already accounted for.
+function ensureContext() {
+  if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'interactive' });
+  return ac;
+}
+function heardContextTime(perfMs) {
+  const ts = ac.getOutputTimestamp ? ac.getOutputTimestamp() : null;
+  if (ts && ts.performanceTime > 0) return ts.contextTime + (perfMs - ts.performanceTime) / 1000;
+  return ac.currentTime - (ac.outputLatency || ac.baseLatency || 0) - (performance.now() - perfMs) / 1000;
+}
+function posAt(perfMs) {
+  if (!playing) return pausedAt;
+  return startOffset + Math.max(0, heardContextTime(perfMs) - startedAt) * S.rate;
+}
+const pos = () => posAt(performance.now());
+function play(from) {
+  if (!buffer) return toast('先載入歌曲 · load a song first');
+  ensureContext().resume();
+  stopSource();
+  const t = clamp(from ?? pausedAt, 0, Math.max(0, duration() - 0.01));
+  src = ac.createBufferSource();
+  src.buffer = buffer;
+  src.playbackRate.value = S.rate;
+  src.connect(ac.destination);
+  startedAt = ac.currentTime + 0.03;
+  startOffset = t;
+  src.start(startedAt, t);
+  src.onended = () => {
+    if (src && playing && pos() >= duration() - 0.05) pause(duration());
+  };
+  playing = true;
+  $('playBtn').textContent = '❚❚ 暫停';
+}
+function stopSource() {
+  if (!src) return;
+  try { src.onended = null; src.stop(); } catch {}
+  src.disconnect();
+  src = null;
+}
+function pause(at) {
+  pausedAt = clamp(at ?? pos(), 0, duration());
+  playing = false;
+  stopSource();
+  $('playBtn').textContent = '▶ 播放';
+}
+function seek(t) {
+  t = clamp(t, 0, duration());
+  if (playing) play(t);
+  else pausedAt = t;
+}
+function setRate(r) {
+  const t = pos();
+  S.rate = r;
+  if (playing) play(t);
+  else pausedAt = t;
+  document.querySelectorAll('[data-rate]').forEach(b => b.classList.toggle('on', +b.dataset.rate === r));
+  save();
+}
+let replayEnd = null; // R stops after the line
+
+// ─── Loading ────────────────────────────────────────────────────────────────────────────────
+async function loadAudio(data, name) {
+  ensureContext();
+  try {
+    buffer = await ac.decodeAudioData(data);
+  } catch (e) {
+    return toast(`無法解碼 · could not decode ${name}: ${e.message || e}`, 4000);
+  }
+  S.audioName = name;
+  peaks = makePeaks(buffer);
+  pause(0);
+  checkRestore();
+  toast(`♪ ${name} · ${fmt(buffer.duration)}`);
+}
+function makePeaks(buf) {
+  const rate = 200; // buckets per second (5 ms)
+  const per = Math.max(1, Math.round(buf.sampleRate / rate));
+  const n = Math.ceil(buf.length / per);
+  const out = new Float32Array(n);
+  const chs = [];
+  for (let c = 0; c < buf.numberOfChannels; c++) chs.push(buf.getChannelData(c));
+  for (let i = 0; i < n; i++) {
+    const a = i * per, b = Math.min(buf.length, a + per);
+    let m = 0;
+    for (const ch of chs) for (let k = a; k < b; k++) { const v = ch[k] < 0 ? -ch[k] : ch[k]; if (v > m) m = v; }
+    out[i] = m;
+  }
+  const sorted = Float32Array.from(out).sort();
+  const ref = sorted[Math.floor(sorted.length * 0.995)] || 1;
+  return { rate: n / buf.duration, data: out, ref };
+}
+const SECTION_LINE = /^(\[[^\]:]*\]|#)/;
+function parseText(text) {
+  return text.split(/\r?\n/).map(s => s.trim()).filter(s => s && !SECTION_LINE.test(s)).map(s => {
+    const [t, ...tr] = s.split('|');
+    return { text: t.trim(), translation: tr.join('|').trim(), start: null, end: null };
+  });
+}
+function parseLRC(text) {
+  const out = [], tag = /\[(\d+):(\d{1,2}(?:[.:]\d{1,3})?)\]/g;
+  const time = (m, s) => {
+    if (s.includes(':')) { const [a, b] = s.split(':'); return +m * 60 + +a + +b / 10 ** b.length; }
+    return +m * 60 + parseFloat(s);
+  };
+  let offset = 0;
+  const raw = [];
+  for (const line of text.replace(/^﻿/, '').split(/\r?\n/)) {
+    const s = line.trim();
+    const meta = /^\[offset:\s*([+-]?\d+)\s*\]$/i.exec(s);
+    if (meta) { offset = +meta[1] / 1000; continue; }
+    const stamps = [];
+    let m, last = 0;
+    tag.lastIndex = 0;
+    while ((m = tag.exec(s)) && m.index === last) { stamps.push(time(m[1], m[2])); last = tag.lastIndex; }
+    if (!stamps.length) continue;
+    const body = s.slice(last).replace(/<\d+:\d{1,2}(?:[.:]\d{1,3})?>/g, '').trim();
+    for (const t of stamps) raw.push({ t: t - offset, body });
+  }
+  raw.sort((a, b) => a.t - b.t);
+  for (const r of raw) {
+    if (!r.body) { if (out.length && out[out.length - 1].end == null) out[out.length - 1].end = r.t; continue; }
+    const prev = out[out.length - 1];
+    if (prev && Math.abs(prev.start - r.t) < 0.001) { if (!prev.translation) prev.translation = r.body; continue; }
+    out.push({ text: r.body, translation: '', start: r.t, end: null });
+  }
+  return out;
+}
+function parseSRT(text) {
+  const out = [];
+  const re = /(\d+):(\d+):(\d+)[,.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,.](\d+)/;
+  const sec = (h, m, s, f) => +h * 3600 + +m * 60 + +s + +f / 10 ** f.length;
+  for (const block of text.replace(/^﻿/, '').split(/\r?\n\s*\r?\n/)) {
+    const rows = block.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    const i = rows.findIndex(r => re.test(r));
+    if (i < 0) continue;
+    const m = re.exec(rows[i]);
+    const body = rows.slice(i + 1).map(r => r.replace(/<[^>]+>/g, ''));
+    if (!body.length) continue;
+    out.push({ text: body[0], translation: body.slice(1).join(' '), start: sec(m[1], m[2], m[3], m[4]), end: sec(m[5], m[6], m[7], m[8]) });
+  }
+  return out;
+}
+function parseJSON(text) {
+  const d = JSON.parse(text);
+  const lines = Array.isArray(d) ? d : d.lines || [];
+  return lines.map(l => ({ text: String(l.text || ''), translation: String(l.translation || ''), start: isFinite(l.start) ? +l.start : null, end: isFinite(l.end) ? +l.end : null }));
+}
+function loadLyrics(text, name) {
+  const ext = (name.match(/\.[^.]+$/) || [''])[0].toLowerCase();
+  let lines;
+  try {
+    lines = ext === '.lrc' ? parseLRC(text) : ext === '.srt' || ext === '.vtt' ? parseSRT(text) : ext === '.json' ? parseJSON(text) : parseText(text);
+  } catch (e) {
+    return toast(`讀不了 · could not read ${name}: ${e.message}`, 4000);
+  }
+  if (!lines.length) return toast(`${name}: 沒有歌詞行 · no lyric lines`, 3000);
+  pushUndo();
+  S.lines = lines;
+  S.cursor = Math.max(0, lines.findIndex(l => l.start == null));
+  if (S.cursor < 0 || lines.every(l => l.start != null)) S.cursor = 0;
+  $('text').value = lines.map(l => (l.translation ? `${l.text} | ${l.translation}` : l.text)).join('\n');
+  tableDirty = true;
+  save();
+  toast(`≡ ${name}: ${lines.length} 句 lines${lines.some(l => l.start != null) ? '（含時間 with times）' : ''}`);
+}
+function loadSongmap(text) {
+  try {
+    const d = JSON.parse(text);
+    if (!Array.isArray(d.beats)) throw new Error('no "beats"');
+    S.songmap = { beats: d.beats, downbeats: d.downbeats || [], sections: d.sections || [] };
+    toast(`▦ songmap: ${d.beats.length} beats, ${S.songmap.sections.length} sections`);
+  } catch (e) {
+    toast(`songmap: ${e.message}`, 3000);
+  }
+}
+async function readFile(file) {
+  const name = file.name;
+  if (/^audio\//.test(file.type) || /\.(wav|mp3|flac|m4a|aac|ogg|opus|aiff?)$/i.test(name)) return loadAudio(await file.arrayBuffer(), name);
+  const text = await file.text();
+  if (/\.json$/i.test(name) && /"beats"\s*:/.test(text) && !/"lines"\s*:/.test(text)) return loadSongmap(text);
+  return loadLyrics(text, name);
+}
+$('audioFile').onchange = e => e.target.files[0] && readFile(e.target.files[0]);
+$('lyricsFile').onchange = e => e.target.files[0] && readFile(e.target.files[0]);
+$('songmapFile').onchange = async e => e.target.files[0] && loadSongmap(await e.target.files[0].text());
+let dragDepth = 0;
+addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; $('drop').classList.add('on'); });
+addEventListener('dragleave', () => { if (--dragDepth <= 0) $('drop').classList.remove('on'); });
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', async e => {
+  e.preventDefault();
+  dragDepth = 0;
+  $('drop').classList.remove('on');
+  for (const f of e.dataTransfer.files) await readFile(f);
+});
+// Served by `studio tap`: ?audio=…&lyrics=…&songmap=… (paths inside the project).
+(async () => {
+  const q = new URLSearchParams(location.search);
+  if (location.protocol === 'file:') return;
+  const get = async (key, asText = true) => {
+    const p = q.get(key);
+    if (!p) return null;
+    try {
+      const r = await fetch(new URL(p, location.origin + '/'), { cache: 'no-store' });
+      if (!r.ok) return null;
+      return { name: p.split('/').pop(), data: asText ? await r.text() : await r.arrayBuffer() };
+    } catch { return null; }
+  };
+  const [au, ly, tx, sm] = await Promise.all([get('audio', false), get('lyrics'), get('text'), get('songmap')]);
+  if (sm) loadSongmap(sm.data);
+  if (ly) loadLyrics(ly.data, ly.name);
+  else if (tx) loadLyrics(tx.data, tx.name);
+  if (au) await loadAudio(au.data, au.name);
+})();
+
+// ─── Editing ────────────────────────────────────────────────────────────────────────────────
+function pushUndo() {
+  S.undo.push(JSON.stringify({ lines: S.lines, cursor: S.cursor }));
+  if (S.undo.length > 300) S.undo.shift();
+}
+function undo() {
+  const u = S.undo.pop();
+  if (!u) return toast('沒有可復原的 · nothing to undo');
+  const d = JSON.parse(u);
+  S.lines = d.lines;
+  S.cursor = d.cursor;
+  tableDirty = true;
+  save();
+  toast('↶ 復原 undo');
+}
+function select(i, { seekTo = false } = {}) {
+  if (!S.lines.length) return;
+  S.cursor = clamp(i, 0, S.lines.length - 1);
+  const l = S.lines[S.cursor];
+  if (seekTo && l.start != null) seek(Math.max(0, l.start - 1.5));
+  tableDirty = true;
+  scrollToCursor();
+}
+function tapDown(perfMs) {
+  if (!S.lines.length) return toast('先載入歌詞 · load the lyrics first');
+  if (!playing) return toast('按 P 播放後再拍 · press P to play, then tap');
+  if (S.cursor >= S.lines.length) return toast('最後一句已拍完 · all lines are tapped (↑ to pick one)');
+  pushUndo();
+  const t = posAt(perfMs) + S.comp;
+  const l = S.lines[S.cursor];
+  l.start = Math.max(0, t);
+  l.end = null;
+  const prev = S.lines[S.cursor - 1];
+  if (prev && prev.end != null && prev.end > l.start) prev.end = l.start;
+  holding = { line: S.cursor, downAt: perfMs };
+  tableDirty = true;
+}
+function tapUp(perfMs) {
+  if (!holding) return;
+  const l = S.lines[holding.line];
+  // A short tap marks the start only; the line then lasts until the next one starts.
+  if (perfMs - holding.downAt >= 180) l.end = Math.max(l.start + 0.05, posAt(perfMs) + S.comp);
+  holding = null;
+  S.cursor = Math.min(S.lines.length, S.cursor + 1);
+  tableDirty = true;
+  save();
+  scrollToCursor();
+}
+function nudge(which, d) {
+  const l = S.lines[S.cursor];
+  if (!l || l[which] == null) return toast(which === 'start' ? '這句還沒有起點 · no start yet' : '這句沒有終點（到下一句為止）· no end: lasts until the next line');
+  pushUndo();
+  l[which] = Math.max(0, l[which] + d);
+  if (which === 'start' && l.end != null && l.end < l.start + 0.05) l.end = l.start + 0.05;
+  if (which === 'end' && l.end < l.start + 0.05) l.end = l.start + 0.05;
+  tableDirty = true;
+  save();
+  toast(`${which === 'start' ? '起點 start' : '終點 end'} ${d > 0 ? '+' : ''}${Math.round(d * 1000)} ms → ${fmt(l[which])}`, 900);
+}
+$('applyBtn').onclick = () => {
+  const fresh = parseText($('text').value);
+  if (!fresh.length) return toast('沒有歌詞行 · no lines in the text');
+  pushUndo();
+  const kept = Math.min(fresh.length, S.lines.length);
+  for (let i = 0; i < kept; i++) Object.assign(fresh[i], { start: S.lines[i].start, end: S.lines[i].end });
+  const changed = fresh.length !== S.lines.length && S.lines.some(l => l.start != null);
+  S.lines = fresh;
+  S.cursor = clamp(S.cursor, 0, fresh.length - 1);
+  tableDirty = true;
+  save();
+  toast(changed ? `${fresh.length} 句；行數改變，時間按行號保留——請檢查 · line count changed: times kept by line number, check them` : `${fresh.length} 句 lines`, changed ? 4500 : 1500);
+};
+$('clearBtn').onclick = () => {
+  pushUndo();
+  for (const l of S.lines) l.start = l.end = null;
+  S.cursor = 0;
+  tableDirty = true;
+  save();
+  toast('已清除，按 Z 復原 · cleared (Z to undo)');
+};
+
+// ─── Keys ───────────────────────────────────────────────────────────────────────────────────
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'TEXTAREA' || calibrating) return;
+  if ($('calModal').classList.contains('on')) return;
+  const k = e.key;
+  if (k === ' ') { e.preventDefault(); if (!e.repeat) tapDown(e.timeStamp); return; }
+  if (e.ctrlKey || e.metaKey) { if (k.toLowerCase() === 'z') { e.preventDefault(); undo(); } return; }
+  const step = e.shiftKey ? 0.05 : 0.01;
+  if (k === 'p' || k === 'P' || k === 'Enter') playing ? pause() : play();
+  else if (k === 'ArrowRight') seek(pos() + (e.shiftKey ? 5 : 2));
+  else if (k === 'ArrowLeft') seek(pos() - (e.shiftKey ? 5 : 2));
+  else if (k === 'ArrowDown') select(S.cursor + 1, { seekTo: !playing });
+  else if (k === 'ArrowUp') select(S.cursor - 1, { seekTo: !playing });
+  else if (k === ',') nudge('start', -step);
+  else if (k === '.') nudge('start', step);
+  else if (k === '<') nudge('end', -step);
+  else if (k === '>') nudge('end', step);
+  else if (k === 'r' || k === 'R') replay();
+  else if (k === 'Delete' || k === 'Backspace') {
+    const l = S.lines[S.cursor];
+    if (l) { pushUndo(); l.start = l.end = null; tableDirty = true; save(); }
+  } else if (k === 'z' || k === 'Z') undo();
+  else if (k === '1') setRate(1);
+  else if (k === '2') setRate(0.75);
+  else if (k === '3') setRate(0.5);
+  else if (k === 'Home') seek(0);
+  else return;
+  e.preventDefault();
+});
+addEventListener('keyup', e => {
+  if (e.key === ' ' && !calibrating) { e.preventDefault(); tapUp(e.timeStamp); }
+});
+addEventListener('blur', () => holding && tapUp(performance.now()));
+function replay() {
+  const l = S.lines[S.cursor];
+  if (!l || l.start == null) return toast('這句還沒有時間 · this line has no time yet');
+  const next = S.lines[S.cursor + 1];
+  const end = l.end ?? (next && next.start != null ? next.start : l.start + 3);
+  play(Math.max(0, l.start - 1.0));
+  replayEnd = end + 0.4;
+}
+$('playBtn').onclick = () => (playing ? pause() : play());
+document.querySelectorAll('[data-rate]').forEach(b => (b.onclick = () => setRate(+b.dataset.rate)));
+
+// ─── Calibration ────────────────────────────────────────────────────────────────────────────
+let calibrating = false;
+const BEEPS = 16, GAP = 0.6;
+function openCal() {
+  $('calModal').classList.add('on');
+  $('calDots').innerHTML = Array.from({ length: BEEPS }, () => '<span></span>').join('');
+  $('calMsg').textContent = S.comp ? `目前補償 current: ${Math.round(S.comp * 1000)} ms` : '';
+}
+function closeCal() {
+  calibrating = false;
+  $('calModal').classList.remove('on');
+}
+$('calBtn').onclick = openCal;
+$('calCancel').onclick = closeCal;
+$('calReset').onclick = () => { S.comp = 0; save(); showComp(); $('calMsg').textContent = '補償歸零 · zero'; };
+$('calStart').onclick = () => {
+  ensureContext().resume();
+  if (playing) pause();
+  const t0 = ac.currentTime + 1.0;
+  const times = [];
+  for (let i = 0; i < BEEPS; i++) {
+    const t = t0 + i * GAP;
+    times.push(t);
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.frequency.value = i % 4 ? 1000 : 1500;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.35, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+    o.connect(g).connect(ac.destination);
+    o.start(t);
+    o.stop(t + 0.08);
+  }
+  const taps = [];
+  const dots = [...$('calDots').children];
+  calibrating = true;
+  $('calMsg').textContent = '跟著嗶聲按空白鍵 · tap Space on the beeps';
+  const onKey = e => {
+    if (e.key !== ' ' || e.repeat) return;
+    e.preventDefault();
+    const heard = heardContextTime(e.timeStamp);
+    let best = 0;
+    for (let i = 1; i < times.length; i++) if (Math.abs(times[i] - heard) < Math.abs(times[best] - heard)) best = i;
+    if (Math.abs(times[best] - heard) < GAP / 2) { taps.push(heard - times[best]); dots[best].classList.add('got'); }
+  };
+  addEventListener('keydown', onKey, true);
+  const tick = () => {
+    if (!calibrating) return removeEventListener('keydown', onKey, true);
+    const now = heardContextTime(performance.now());
+    dots.forEach((d, i) => d.classList.toggle('beep', now >= times[i] && now < times[i] + 0.12));
+    if (now < times[times.length - 1] + 0.5) return requestAnimationFrame(tick);
+    removeEventListener('keydown', onKey, true);
+    calibrating = false;
+    const use = taps.slice(3).sort((a, b) => a - b); // the first taps find the beat
+    if (use.length < 6) return ($('calMsg').textContent = `只收到 ${taps.length} 下，請再試一次 · only ${taps.length} taps, try again`);
+    const med = use[Math.floor(use.length / 2)];
+    const spread = use[Math.floor(use.length * 0.8)] - use[Math.floor(use.length * 0.2)];
+    S.comp = -med;
+    save();
+    showComp();
+    $('calMsg').textContent = `你的按鍵平均${med >= 0 ? '晚' : '早'} ${Math.abs(Math.round(med * 1000))} ms（離散 ±${Math.round(spread * 500)} ms），已補償。· your taps land ${Math.round(med * 1000)} ms ${med >= 0 ? 'late' : 'early'} (±${Math.round(spread * 500)} ms); compensated.`;
+  };
+  requestAnimationFrame(tick);
+};
+function showComp() {
+  $('compChip').textContent = `補償 ${S.comp >= 0 ? '+' : ''}${Math.round(S.comp * 1000)} ms`;
+}
+
+// ─── Export ─────────────────────────────────────────────────────────────────────────────────
+const lrcTime = t => {
+  const m = Math.floor(t / 60);
+  return `[${String(m).padStart(2, '0')}:${(t - m * 60).toFixed(3).padStart(6, '0')}]`;
+};
+function toLRC() {
+  const out = [`[re:claude-studio lyric tapper]`, `[length:${fmt(duration())}]`];
+  const timed = S.lines.filter(l => l.start != null).sort((a, b) => a.start - b.start);
+  timed.forEach((l, i) => {
+    out.push(lrcTime(l.start) + l.text);
+    if (l.translation) out.push(lrcTime(l.start) + l.translation);
+    const next = timed[i + 1];
+    if (l.end != null && (!next || next.start - l.end >= 0.1)) out.push(lrcTime(l.end)); // a blank time line ends the line
+  });
+  return out.join('\n') + '\n';
+}
+function exportCheck() {
+  const missing = S.lines.filter(l => l.start == null).length;
+  if (!S.lines.length) { toast('沒有歌詞 · no lyrics'); return false; }
+  if (missing) toast(`注意：${missing} 句沒有時間，不會匯出 · ${missing} lines have no time and are left out`, 3500);
+  return true;
+}
+$('saveBtn').onclick = () => {
+  if (!exportCheck()) return;
+  const name = (S.audioName.replace(/\.[^.]+$/, '') || 'lyrics') + '.tapped.lrc';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([toLRC()], { type: 'text/plain;charset=utf-8' }));
+  a.download = name;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  notes(`已下載 ${name}。下一步 · next:\n  node tools/studio.mjs lyrics import <專案> ${name}${S.lines.some(l => l.translation) ? ' --dupes translation' : ''}\n  node tools/studio.mjs lyrics snap <專案>\n  node tools/studio.mjs lyrics check <專案>`);
+};
+$('copyBtn').onclick = async () => {
+  if (!exportCheck()) return;
+  try {
+    await navigator.clipboard.writeText(toLRC());
+    toast('已複製 LRC · copied');
+  } catch {
+    $('text').value = toLRC();
+    $('text').select();
+    toast('剪貼簿不可用：LRC 已放進右側文字框 · clipboard blocked: the LRC is in the text box', 3500);
+  }
+};
+function notes(s) { $('notes').textContent = s; }
+
+// ─── Saving the session in this browser (a convenience only) ────────────────────────────────
+const KEY = 'claude-studio.lyric-tapper.v1';
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify({ lines: S.lines, cursor: S.cursor, comp: S.comp, rate: S.rate, audioName: S.audioName, at: Date.now() })); } catch {}
+}
+function stored() {
+  try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; }
+}
+function checkRestore() {
+  const d = stored();
+  const timed = d && d.lines ? d.lines.filter(l => l.start != null).length : 0;
+  const btn = $('restoreBtn');
+  if (!timed || (d.audioName && S.audioName && d.audioName !== S.audioName)) return (btn.style.display = 'none');
+  if (S.lines.length && JSON.stringify(S.lines) === JSON.stringify(d.lines)) return (btn.style.display = 'none');
+  btn.style.display = '';
+  btn.textContent = `↺ 恢復上次 Restore (${timed}/${d.lines.length})`;
+  btn.onclick = () => {
+    pushUndo();
+    S.lines = d.lines;
+    S.cursor = clamp(d.cursor || 0, 0, d.lines.length);
+    $('text').value = d.lines.map(l => (l.translation ? `${l.text} | ${l.translation}` : l.text)).join('\n');
+    tableDirty = true;
+    btn.style.display = 'none';
+    toast('已恢復 · restored');
+  };
+}
+(() => {
+  const d = stored();
+  if (d) { S.comp = +d.comp || 0; if (d.rate) S.rate = d.rate; }
+  showComp();
+  document.querySelectorAll('[data-rate]').forEach(b => b.classList.toggle('on', +b.dataset.rate === S.rate));
+  checkRestore();
+})();
+
+// ─── Drawing ────────────────────────────────────────────────────────────────────────────────
+const zoom = $('zoom'), over = $('over');
+function fit(c) {
+  const r = c.getBoundingClientRect(), dpr = devicePixelRatio || 1;
+  const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
+  if (c.width !== w || c.height !== h) { c.width = w; c.height = h; }
+  return { w, h, dpr };
+}
+const SPAN = 8; // seconds across the zoom view at 1×
+function drawZoom(t) {
+  const { w, h, dpr } = fit(zoom);
+  const g = zoom.getContext('2d');
+  g.clearRect(0, 0, w, h);
+  const span = SPAN * Math.max(0.5, S.rate), left = t - span * 0.3;
+  const X = s => ((s - left) / span) * w;
+  const mid = h * 0.55;
+  if (S.songmap) {
+    for (const s of S.songmap.sections) {
+      if (s.end < left || s.start > left + span) continue;
+      g.fillStyle = '#ffffff07';
+      g.fillRect(X(s.start), 0, X(s.end) - X(s.start), h);
+      g.fillStyle = '#8d8b93';
+      g.font = `${11 * dpr}px system-ui,sans-serif`;
+      g.fillText(`${s.label || ''} ${s.kind || s.name || ''}`.trim(), Math.max(4 * dpr, X(s.start) + 4 * dpr), 13 * dpr);
+    }
+    const downs = new Set(S.songmap.downbeats.map(d => d.toFixed(3)));
+    for (const b of S.songmap.beats) {
+      if (b < left || b > left + span) continue;
+      const down = downs.has(b.toFixed(3));
+      g.fillStyle = down ? '#ffffff30' : '#ffffff12';
+      g.fillRect(Math.round(X(b)), down ? 0 : h * 0.2, down ? 2 * dpr : dpr, down ? h : h * 0.7);
+    }
+  }
+  if (peaks) {
+    g.fillStyle = '#5b6a80';
+    const k = h * 0.36 / peaks.ref;
+    for (let x = 0; x < w; x++) {
+      const a = Math.floor((left + (x / w) * span) * peaks.rate), b = Math.max(a + 1, Math.floor((left + ((x + 1) / w) * span) * peaks.rate));
+      if (b <= 0 || a >= peaks.data.length) continue;
+      let m = 0;
+      for (let i = Math.max(0, a); i < Math.min(b, peaks.data.length); i++) if (peaks.data[i] > m) m = peaks.data[i];
+      const y = Math.min(h * 0.42, m * k);
+      g.fillRect(x, mid - y, 1, y * 2 || 1);
+    }
+  }
+  S.lines.forEach((l, i) => {
+    if (l.start == null) return;
+    const next = S.lines.slice(i + 1).find(n => n.start != null);
+    const end = l.end ?? (next ? next.start : l.start + 2);
+    if (end < left || l.start > left + span) return;
+    const cur = i === S.cursor || (holding && holding.line === i);
+    g.fillStyle = cur ? '#6aa8ff26' : '#ffb34718';
+    g.fillRect(X(l.start), h * 0.78, X(end) - X(l.start), h * 0.22);
+    g.fillStyle = cur ? '#6aa8ff' : '#ffb347';
+    g.fillRect(X(l.start) - dpr, h * 0.12, 2 * dpr, h * 0.88);
+    if (l.end != null) { g.fillStyle = cur ? '#6aa8ff99' : '#ffb34788'; g.fillRect(X(l.end) - dpr, h * 0.6, 2 * dpr, h * 0.4); }
+    g.fillStyle = cur ? '#cfe2ff' : '#ebe8e1';
+    g.font = `600 ${13 * dpr}px system-ui,"Noto Sans TC","Microsoft JhengHei",sans-serif`;
+    g.save();
+    g.beginPath();
+    g.rect(X(l.start), h * 0.78, Math.max(0, X(end) - X(l.start) - 4 * dpr), h * 0.22);
+    g.clip();
+    g.fillText(`${i + 1} ${l.text}`, X(l.start) + 5 * dpr, h * 0.93);
+    g.restore();
+  });
+  g.fillStyle = holding ? '#ffb347' : '#ffffff';
+  g.fillRect(Math.round(X(t)) - dpr, 0, 2 * dpr, h);
+}
+let overCache = null;
+function drawOver(t) {
+  const { w, h, dpr } = fit(over);
+  const g = over.getContext('2d');
+  const dur = duration() || 1;
+  if (!overCache || overCache.w !== w || overCache.h !== h || overCache.peaks !== peaks) {
+    const c = document.createElement('canvas');
+    c.width = w;
+    c.height = h;
+    const cg = c.getContext('2d');
+    if (peaks) {
+      cg.fillStyle = '#3b4556';
+      const per = peaks.data.length / w;
+      for (let x = 0; x < w; x++) {
+        let m = 0;
+        for (let i = Math.floor(x * per); i < Math.floor((x + 1) * per); i++) if (peaks.data[i] > m) m = peaks.data[i];
+        const y = Math.min(h * 0.48, (m / peaks.ref) * h * 0.45);
+        cg.fillRect(x, h / 2 - y, 1, y * 2 || 1);
+      }
+    }
+    overCache = { w, h, peaks, canvas: c };
+  }
+  g.clearRect(0, 0, w, h);
+  g.drawImage(overCache.canvas, 0, 0);
+  S.lines.forEach((l, i) => {
+    if (l.start == null) return;
+    g.fillStyle = i === S.cursor ? '#6aa8ff' : '#ffb347aa';
+    g.fillRect((l.start / dur) * w, h - 6 * dpr, Math.max(dpr, (((l.end ?? l.start + 1) - l.start) / dur) * w), 4 * dpr);
+  });
+  g.fillStyle = '#fff';
+  g.fillRect((t / dur) * w - dpr, 0, 2 * dpr, h);
+}
+const seekFrom = (c, e, toTime) => {
+  const r = c.getBoundingClientRect();
+  seek(toTime((e.clientX - r.left) / r.width));
+};
+over.onpointerdown = e => seekFrom(over, e, u => u * duration());
+zoom.onpointerdown = e => {
+  const span = SPAN * Math.max(0.5, S.rate);
+  seekFrom(zoom, e, u => pos() - span * 0.3 + u * span);
+};
+
+function renderTable() {
+  const list = $('list');
+  list.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  S.lines.forEach((l, i) => {
+    const row = document.createElement('div');
+    row.className = 'row' + (i === S.cursor ? ' cur' : '');
+    row.dataset.i = i;
+    row.tabIndex = -1;
+    row.setAttribute('role', 'option');
+    const prev = S.lines.slice(0, i).reverse().find(p => p.start != null);
+    if (l.start != null && prev && l.start < prev.start) row.classList.add('warn');
+    row.innerHTML = `<span class="n">${i + 1}</span><span class="t s ${l.start == null ? 'unset' : ''}">${fmt(l.start)}</span><span class="t ${l.end == null ? 'unset' : ''}">${l.end == null ? (l.start == null ? '—' : '→') : fmt(l.end)}</span><span class="x"></span>`;
+    const x = row.querySelector('.x');
+    x.textContent = l.text;
+    if (l.translation) { const tr = document.createElement('i'); tr.textContent = l.translation; x.appendChild(tr); }
+    row.onclick = () => select(i, { seekTo: true });
+    frag.appendChild(row);
+  });
+  if (S.cursor >= S.lines.length && S.lines.length) {
+    const done = document.createElement('div');
+    done.className = 'row cur';
+    done.innerHTML = '<span class="n">✓</span><span class="t"></span><span class="t"></span><span class="x">全部拍完 · every line is tapped — 下載 LRC</span>';
+    frag.appendChild(done);
+  }
+  list.appendChild(frag);
+  tableDirty = false;
+  lastLive = -2; // the rows are new: mark the sounding line again
+}
+function scrollToCursor() {
+  requestAnimationFrame(() => {
+    const row = $('list').querySelector('.row.cur');
+    if (row) row.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+}
+let lastLive = -1;
+function frame() {
+  requestAnimationFrame(frame);
+  const t = pos();
+  if (playing && replayEnd != null && t >= replayEnd) { pause(); replayEnd = null; }
+  if (!playing) replayEnd = null;
+  if (tableDirty) renderTable();
+  drawZoom(t);
+  drawOver(t);
+  $('time').textContent = `${fmt(t)} / ${fmt(duration())}  ·  ${S.rate}×  ·  ${S.lines.filter(l => l.start != null).length}/${S.lines.length} 句`;
+  const l = S.lines[S.cursor];
+  const n = S.lines[S.cursor + 1];
+  if (S.lines.length) {
+    $('nowLab').textContent = holding ? `正在記錄第 ${holding.line + 1} 句 · recording line ${holding.line + 1}` : `下一句要拍 · next line to tap (#${Math.min(S.cursor + 1, S.lines.length)})`;
+    $('nowText').textContent = holding ? S.lines[holding.line].text : l ? l.text : '✓ 全部拍完 · all tapped';
+    $('nextText').textContent = holding ? (S.lines[holding.line + 1] || {}).text || '' : n ? n.text : '';
+  }
+  $('nowText').classList.toggle('holding', !!holding);
+  $('hold').classList.toggle('on', !!holding);
+  // The line sounding now (by its times), highlighted in the list.
+  let live = -1;
+  S.lines.forEach((x, i) => {
+    if (x.start == null || t < x.start) return;
+    const next = S.lines.slice(i + 1).find(y => y.start != null);
+    if (t < (x.end ?? (next ? next.start : x.start + 3))) live = i;
+  });
+  if (live !== lastLive) {
+    document.querySelectorAll('.row.live').forEach(r => r.classList.remove('live'));
+    const r = document.querySelector(`.row[data-i="${live}"]`);
+    if (r) r.classList.add('live');
+    lastLive = live;
+  }
+}
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="zh-Hant">
+<meta charset="utf-8">
+<title>film</title>
+<script type="module">
+  // The film: shots come from shots/*.js and take every time from the song (never hard-coded seconds).
+  // Open in the preview (node tools/studio.mjs serve <dir>) — space plays, ←/→ step one frame.
+  import { film, grain, vignette } from './engine/studio.js';
+  import { backdrop } from './shots/backdrop.js';
+  import { titleCard, endCard } from './shots/cards.js';
+  import { lyricLayer } from './shots/lyrics.js';
+
+  film({
+    shots: [backdrop, titleCard, lyricLayer, endCard],
+    post(ctx, s) {
+      vignette(ctx, { amount: 0.45 });
+      grain(ctx, s.frame, { amount: 0.045 });
+    },
+  });
+</script>
+</html>

@@ -1,0 +1,12 @@
+# Songs, stems, mixes and renders stay on your machine.
+audio/*
+!audio/README.md
+out/
+qa/*
+!qa/report.md
+.segments/
+
+# data/lyrics.json is committed: the lyrics are this repository's own (MIT) and marked
+# "publishable": true. For a song you do not own, ignore data/lyrics.json here and share
+# data/lyrics.timing.json (times only, no text) instead.
+data/lyrics.json.bak

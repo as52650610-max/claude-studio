@@ -1,0 +1,13 @@
+# Songs, stems, mixes and renders stay on your machine.
+audio/*
+!audio/README.md
+out/
+qa/*
+!qa/report.md
+.segments/
+
+# Lyrics of a song you do not own must not be published. data/lyrics.timing.json (times only,
+# no text) is safe to share. For your own lyrics, delete these two lines and add
+# "publishable": true to data/lyrics.json.
+data/lyrics.json
+data/lyrics.json.bak

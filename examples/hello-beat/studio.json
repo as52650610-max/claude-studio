@@ -1,0 +1,28 @@
+{
+  "name": "hello-beat",
+  "title": "hello, beat",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "audio": "audio/song.wav",
+  "songmap": "data/songmap.json",
+  "fonts": [
+    {
+      "family": "Noto Sans TC",
+      "src": "fonts/NotoSansTC.subset.ttf",
+      "weight": "100 900",
+      "from": "C:/Windows/Fonts/NotoSansTC-VF.ttf"
+    }
+  ],
+  "lyricFont": "Noto Sans TC",
+  "background": "#F2EFE8",
+  "previewScale": 0.5,
+  "mix": {
+    "target": -14,
+    "ceiling": -1.5
+  },
+  "render": {
+    "codec": "x264",
+    "crf": 16
+  }
+}

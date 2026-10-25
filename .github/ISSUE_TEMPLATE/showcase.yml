@@ -1,0 +1,34 @@
+name: 作品分享 Showcase
+description: 用 claude-studio 做了作品？分享連結與做法 · Made something with claude-studio? Share the link and how you made it
+labels: [showcase]
+body:
+  - type: input
+    id: link
+    attributes:
+      label: 作品連結 Link
+      placeholder: https://www.bilibili.com/video/… · https://youtu.be/…
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: 標題與長度 Title and length
+      placeholder: 《…》歌詞 MV · 3:42 · 1920×1080 60 fps
+  - type: textarea
+    id: how
+    attributes:
+      label: 怎麼做的 How it was made
+      description: 模型與 effort、用了哪些關卡與工具、花了多久、大約多少 token 或額度、最難的地方 · Model and effort, which gates and tools, time, tokens or quota, the hardest part
+  - type: textarea
+    id: rights
+    attributes:
+      label: 音樂與素材的權利 Rights
+      description: 歌曲是誰的、是否取得允許或符合二創規範；有沒有使用生成模型 · Whose song, permission or fan-work rules followed; any generative models used
+    validations:
+      required: true
+  - type: checkboxes
+    id: ok
+    attributes:
+      label: 同意 Consent
+      options:
+        - label: 可以把這個作品放進 README 的作品區（附上署名與連結）· You may feature it in the README with credit and a link
